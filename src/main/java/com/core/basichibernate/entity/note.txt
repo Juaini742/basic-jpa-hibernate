@@ -1,0 +1,150 @@
+### Catatan tentang Relasi JPA
+
+#### 1. **One-to-One**
+- **Deskripsi**: Relasi ini menunjukkan bahwa satu entitas memiliki tepat satu relasi dengan entitas lain.
+- **Contoh**: `Users` dan `Profile`
+- **Anotasi**:
+  - Di kelas `Users`:
+    ```java
+    @OneToOne
+    @JoinColumn(name = "profile_id")
+    private Profile profile;
+    ```
+  - Di kelas `Profile`:
+    ```java
+    @OneToOne(mappedBy = "profile")
+    private User user;
+    ```
+- **Keterangan**:
+  - `mappedBy` di `Profile` menunjukkan bahwa `Profile` adalah sisi tidak memiliki relasi, dan kolom `profile_id` di tabel `users` akan menyimpan referensi ke `Profile`.
+
+#### 2. **Many-to-Many**
+- **Deskripsi**: Relasi ini menunjukkan bahwa satu entitas dapat memiliki banyak relasi dengan entitas lain, dan sebaliknya.
+- **Contoh**: `User` dan `Role`
+- **Anotasi**:
+  - Di kelas `User`:
+    ```java
+    @ManyToMany
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
+    ```
+  - Di kelas `Role`:
+    ```java
+    @ManyToMany(mappedBy = "roles")
+    private Set<User> users = new HashSet<>();
+    ```
+- **Keterangan**:
+  - Tabel `user_roles` adalah tabel join yang menyimpan hubungan antara `User` dan `Role`, dengan kolom `user_id` dan `role_id` sebagai referensi.
+
+#### 3. **One-to-Many**
+- **Deskripsi**: Relasi ini menunjukkan bahwa satu entitas dapat memiliki banyak relasi dengan entitas lain, tetapi entitas lain hanya memiliki satu relasi dengan entitas pertama.
+- **Contoh**: `User` dan `Post`
+- **Anotasi**:
+  - Di kelas `User`:
+    ```java
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Post> posts = new ArrayList<>();
+    ```
+  - Di kelas `Post`:
+    ```java
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+    ```
+- **Keterangan**:
+  - `mappedBy = "user"` di `User` menunjukkan bahwa `User` adalah sisi tidak memiliki relasi. Kolom `user_id` di tabel `posts` menyimpan referensi ke `User`.
+
+#### 4. **Many-to-One**
+- **Deskripsi**: Kebalikan dari relasi One-to-Many. Satu entitas dapat memiliki relasi dengan banyak entitas lain.
+- **Contoh**: `Comment` ke `Post` dan `User`
+- **Anotasi**:
+  - Di kelas `Comment`:
+    ```java
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+    ```
+- **Keterangan**:
+  - `post_id` dan `user_id` di tabel `comments` masing-masing menyimpan referensi ke `Post` dan `User`.
+
+### Format untuk `note.txt`
+
+Berdasarkan penjelasan di atas, kamu bisa membuat file `note.txt` dengan format berikut:
+
+```
+# Catatan tentang Relasi JPA
+
+## 1. One-to-One
+- Deskripsi: Relasi ini menunjukkan bahwa satu entitas memiliki tepat satu relasi dengan entitas lain.
+- Contoh: User dan Profile
+- Anotasi:
+  - Di kelas User:
+    @OneToOne
+    @JoinColumn(name = "profile_id")
+    private Profile profile;
+
+  - Di kelas Profile:
+    @OneToOne(mappedBy = "profile")
+    private User user;
+
+- Keterangan: mappedBy di Profile menunjukkan bahwa Profile adalah sisi tidak memiliki relasi, dan kolom profile_id di tabel users akan menyimpan referensi ke Profile.
+
+## 2. Many-to-Many
+- Deskripsi: Relasi ini menunjukkan bahwa satu entitas dapat memiliki banyak relasi dengan entitas lain, dan sebaliknya.
+- Contoh: User dan Role
+- Anotasi:
+  - Di kelas User:
+    @ManyToMany
+    @JoinTable(
+        name = "user_roles",
+        joinColumns = @JoinColumn(name = "user_id"),
+        inverseJoinColumns = @JoinColumn(name = "role_id")
+    )
+    private Set<Role> roles = new HashSet<>();
+
+  - Di kelas Role:
+    @ManyToMany(mappedBy = "roles")
+    private Set<User> users = new HashSet<>();
+
+- Keterangan: Tabel user_roles adalah tabel join yang menyimpan hubungan antara User dan Role, dengan kolom user_id dan role_id sebagai referensi.
+
+## 3. One-to-Many
+- Deskripsi: Relasi ini menunjukkan bahwa satu entitas dapat memiliki banyak relasi dengan entitas lain, tetapi entitas lain hanya memiliki satu relasi dengan entitas pertama.
+- Contoh: User dan Post
+- Anotasi:
+  - Di kelas User:
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Post> posts = new ArrayList<>();
+
+  - Di kelas Post:
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+- Keterangan: mappedBy = "user" di User menunjukkan bahwa User adalah sisi tidak memiliki relasi. Kolom user_id di tabel posts menyimpan referensi ke User.
+
+## 4. Many-to-One
+- Deskripsi: Kebalikan dari relasi One-to-Many. Satu entitas dapat memiliki relasi dengan banyak entitas lain.
+- Contoh: Comment ke Post dan User
+- Anotasi:
+  - Di kelas Comment:
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+- Keterangan: post_id dan user_id di tabel comments masing-masing menyimpan referensi ke Post dan User.
+```
+
+Dengan catatan ini, kamu akan memiliki referensi yang jelas mengenai relasi antar entitas saat bekerja dengan JPA dan Hibernate. Semoga bermanfaat untuk proses belajarmu!
