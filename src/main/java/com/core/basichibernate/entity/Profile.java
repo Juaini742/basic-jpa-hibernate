@@ -43,13 +43,5 @@ public class Profile {
     @JsonBackReference
     private Users user;
 
-    /**
-     * @ManyToOne: Menandakan bahwa relasi ini adalah tipe banyak-ke-satu. Setiap Post akan memiliki referensi ke satu User.
-     * @JoinColumn(name = "user_id"): Mengindikasikan bahwa di tabel posts,
-     * akan ada kolom bernama user_id yang digunakan untuk menyimpan ID dari User.
-     * Ini adalah sisi pemilik dari relasi, di mana informasi relasi disimpan.
-     */
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private Users users;
+    private Long userId;
 }

@@ -29,4 +29,5 @@ public class ProfileDTO {
     private String address;
 
     private Long userId;
+    private UserDTO user;
 }

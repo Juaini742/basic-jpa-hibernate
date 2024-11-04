@@ -1,6 +1,5 @@
 package com.core.basichibernate.service;
 
-
 import com.core.basichibernate.entity.Profile;
 import com.core.basichibernate.entity.Users;
 import com.core.basichibernate.repository.ProfileRepository;
@@ -15,9 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
  * @Transectional adalah anotasi yang digunakan untuk mengaktifkan transaksi database.
  * Dengan menggunakan @Transactional, semua operasi database yang terkait dengan metode ini akan dijalankan dalam satu transaksi.
  * Jika terjadi kesalahan dalam operasi database, transaksi akan dibatalkan, dan semua perubahan yang dilakukan sebelumnya akan dikembalikan ke keadaan sebelumnya.
- *
- *
- *
  */
 @Service
 @Transactional
@@ -33,7 +29,6 @@ public class ProfileService {
 
     // CREATE
     /**
-     * @param userId
      * @param profileDTO
      * @return
      * createProfile() adalah metode yang digunakan untuk membuat profil pengguna baru.
@@ -47,21 +42,32 @@ public class ProfileService {
      *     "userId": 1
      * }
      */
-    public Profile createProfile(Long userId, ProfileDTO profileDTO) {
-        Users user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+    public ProfileDTO createProfile(ProfileDTO profileDTO) {
+        Users existUser = userRepository.findById(profileDTO.getUserId()).orElseThrow(() -> new IllegalArgumentException("User not found"));
+
         Profile profile = new Profile();
         profile.setFirstName(profileDTO.getFirstName());
         profile.setLastName(profileDTO.getLastName());
-        profile.setAddress(profileDTO.getAddress());
         profile.setPhone(profileDTO.getPhone());
+        profile.setAddress(profileDTO.getAddress());
+        profile.setUserId(profileDTO.getUserId());
 
-        profile.setUser(user);
-        user.setProfile(profile);
+        profile.setUser(existUser);
+        existUser.setProfile(profile);
 
-        entityManager.flush();
+        Profile savedProfile = profileRepository.save(profile);
 
-        userRepository.save(user);
-        return profile;
+        existUser.setProfile(savedProfile);
+        userRepository.save(existUser);
+
+        ProfileDTO createdProfileDTO = new ProfileDTO();
+        createdProfileDTO.setUserId(existUser.getId());
+        createdProfileDTO.setFirstName(savedProfile.getFirstName());
+        createdProfileDTO.setLastName(savedProfile.getLastName());
+        createdProfileDTO.setPhone(savedProfile.getPhone());
+        createdProfileDTO.setAddress(savedProfile.getAddress());
+
+        return createdProfileDTO;
     }
 
     /**
@@ -81,7 +87,6 @@ public class ProfileService {
     /**
      * @param userId
      * @param profileDTO
-     * @return
      * updateProfile() adalah metode yang digunakan untuk memperbarui profil pengguna.
      * Metode ini menerima ID pengguna dan objek ProfileDTO yang berisi informasi profil yang akan diperbarui.
      * Metode ini mencari profil pengguna yang sesuai dalam database, memperbarui informasi profil, dan menyimpan profil yang diperbarui ke dalam database.
@@ -96,6 +101,8 @@ public class ProfileService {
      */
     public Profile updateProfile(Long userId, ProfileDTO profileDTO) {
         Profile profile = profileRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("Profile not found"));
+        profile.setFirstName(profileDTO.getFirstName());
+        profile.setLastName(profileDTO.getLastName());
         profile.setAddress(profileDTO.getAddress());
         profile.setPhone(profileDTO.getPhone());
         return profileRepository.save(profile);
@@ -112,7 +119,9 @@ public class ProfileService {
      */
     public void deleteProfile(Long userId) {
         Profile profile = profileRepository.findByUserId(userId).orElseThrow(() -> new RuntimeException("Profile not found"));
-        profileRepository.delete(profile);
+        Users users = userRepository.findById(profile.getUserId()).orElseThrow(() -> new RuntimeException("User not found"));
+        users.setProfile(null);
+        profileRepository.deleteById(profile.getId());
     }
 
 }
